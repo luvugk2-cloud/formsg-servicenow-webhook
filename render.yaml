@@ -25,7 +25,7 @@ services:
         sync: false
 
       - key: SERVICENOW_TABLE
-        value: u_yrsg_case
+        value: u_yrsg_case_creation
 
       - key: PORT
         value: 3000
