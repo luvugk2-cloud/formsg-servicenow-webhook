@@ -48,18 +48,8 @@ app.post('/formsg/webhook',
         if (submission) {
             // Continue processing the submission
             console.log(submission);
-            ////////////////mapping logic///////////////////
-            // 2) Extract FormSG responses
-  //const body = req.body;
-  //const responses = body?.data?.responses || [];
-
-  //function findField(name) {
-   // const f = submission.response.answer.find((r) =>
-    //typeof r?.question === 'string' &&
-     // r.question.toLowerCase().includes(name.toLowerCase())
-    //);
-    //return f?.answer || null;
-  //}
+////////////////mapping logic///////////////////
+    
 
 function findField(submission, keyword) {
   const answers = submission?.response?.answers;
@@ -87,59 +77,69 @@ function findField(submission, keyword) {
 
 
   const mapped = {
-    name: findField(submission,"Demo"),
-    description: findField(submission,"Type of Application"),
-    unique_number: findField(submission,"Type of Employment Assistance required"),
-    name: findField(submission,"Programme Details"),
-    description: findField(submission,"Programme Status"),
-    unique_number: findField(submission,"Inmate No."),
-    name: findField(submission,"Date of Release (EDR)"),
-    description: findField(submission,"Programme Emplacement Date"),
-    unique_number: findField(submission,"Have you attended any Job Preparation (JP) session by YRSG for your current incarceration?"),
-    name: findField(submission,"Where did you attend the Job Preparation (JP) session?"),
-    description: findField(submission,"Are you being assisted by any staff from Yellow Ribbon Singapore (YRSG) or Selarang Halfway House?"),
-    unique_number: findField(submission,"Name and Contact Number of Yellow Ribbon Singapore (YRSG) or Selarang Halfway House staff who is assisting you"),
-    name: findField(submission,"Current or Last Offence"),
-    description: findField(submission,"Reintegration Officer (RO)'s Name and Contact Number"),
-    unique_number: findField(submission,"Personal Information"),
+    demo: findField(submission,"Demo"),
+    type_of_application: findField(submission,"Type of Application"),
+    employment_assistance: findField(submission,"Type of Employment Assistance required"),
+    programme_details: findField(submission,"Programme Details"),
+    programme_status: findField(submission,"Programme Status"),
+    inmate_no: findField(submission,"Inmate No."),
+    dor: findField(submission,"Date of Release (EDR)"),
+    programme_emplacement_date: findField(submission,"Programme Emplacement Date"),
+    jp_attend: findField(submission,"Have you attended any Job Preparation (JP) session by YRSG for your current incarceration?"),
+    where_jp_attend: findField(submission,"Where did you attend the Job Preparation (JP) session?"),
+    assisted_by_yrsg: findField(submission,"Are you being assisted by any staff from Yellow Ribbon Singapore (YRSG) or Selarang Halfway House?"),
+    name_yrsg: findField(submission,"Name and Contact Number of Yellow Ribbon Singapore (YRSG) or Selarang Halfway House staff who is assisting you"),
+    current_last_offence: findField(submission,"Current or Last Offence"),
+    ro_name: findField(submission,"Reintegration Officer (RO)'s Name and Contact Number"),
+    personal_information: findField(submission,"Personal Information"),
     name1: findField(submission,"Name"),
-    unique_number: findField(submission,"NRIC"),
-    description: findField(submission,"Nationality"),
-    unique_number: findField(submission,"Sex"),
-    description: findField(submission,"Race"),
-    unique_number: findField(submission,"Date of Birth"),
-    unique_number: findField(submission,"Marital Status"),
-    description: findField(submission,"National Service"),
-    unique_number: findField(submission,"Contact Number"),
-    unique_number: findField(submission,"Email"),
-    description: findField(submission,"Next-of-Kin's Name"),
-    unique_number: findField(submission,"Next-of-Kin's Contact Number"),
-    unique_number: findField(submission,"Local address"),
-    description: findField(submission,"Do you have any visible tattoo?"),
-    unique_number: findField(submission,"Tattoo Details"),
-    unique_number: findField(submission,"Education / Language Proficiency / Skills"),
-    description: findField(submission,"Highest Educational Level"),
-    unique_number: findField(submission,"Specialisation/Field of Highest Education"),
-    unique_number: findField(submission,"Spoken (Language)"),
-    description: findField(submission,"Written (Language)"),
-    unique_number: findField(submission,"Driving/Vocational Licence/Certification"),
-    description: findField(submission,"Employment History"),
-    unique_number: findField(submission,"Job History (Company Name, Job Position, Period of Employment MM/YY to MM/YY (e.g. 10/20 to 08/22), Salary)"),
-    description: findField(submission,"Job Choice 1: Position Requested"),
-    unique_number: findField(submission,"Job Choice 1: Expected Salary"),
-    description: findField(submission,"Job Choice 1: Requested Work Region"),
-    unique_number: findField(submission,"Job Choice 2: Position Requested"),
-    description: findField(submission,"Job Choice 2: Expected Salary"),
-    unique_number: findField(submission,"Job Choice 2: Requested Work Region"),
-    description: findField(submission,"Work hours preference"),
-    unique_number: findField(submission,"For Clients with Religious Preferences: F&B/Grocery/Food Delivery Jobs"),
+    nric: findField(submission,"NRIC"),
+    nationality: findField(submission,"Nationality"),
+    sex: findField(submission,"Sex"),
+    race: findField(submission,"Race"),
+    dob: findField(submission,"Date of Birth"),
+    marital_status: findField(submission,"Marital Status"),
+    national_service: findField(submission,"National Service"),
+    contact_number: findField(submission,"Contact Number"),
+    email: findField(submission,"Email"),
+    NOK_name: findField(submission,"Next-of-Kin's Name"),
+    NOK_contact_number: findField(submission,"Next-of-Kin's Contact Number"),
+    local_address: findField(submission,"Local address"),
+    tattoo: findField(submission,"Do you have any visible tattoo?"),
+    tatto_details: findField(submission,"Tattoo Details"),
+    els: findField(submission,"Education / Language Proficiency / Skills"),
+    hel: findField(submission,"Highest Educational Level"),
+    she: findField(submission,"Specialisation/Field of Highest Education"),
+    spoken: findField(submission,"Spoken (Language)"),
+    written: findField(submission,"Written (Language)"),
+    dlc: findField(submission,"Driving/Vocational Licence/Certification"),
+    employment_history: findField(submission,"Employment History"),
+    cjp: findField(submission,"Job History (Company Name, Job Position, Period of Employment MM/YY to MM/YY (e.g. 10/20 to 08/22), Salary)"),
+    jps1: findField(submission,"Job Choice 1: Position Requested"),
+    jes1: findField(submission,"Job Choice 1: Expected Salary"),
+    jrwr1: findField(submission,"Job Choice 1: Requested Work Region"),
+    jps2: findField(submission,"Job Choice 2: Position Requested"),
+    jes2: findField(submission,"Job Choice 2: Expected Salary"),
+    jrwr2: findField(submission,"Job Choice 2: Requested Work Region"),
+    whp: findField(submission,"Work hours preference"),
+    religious_preference: findField(submission,"For Clients with Religious Preferences: F&B/Grocery/Food Delivery Jobs"),
   };
 
   console.log("📦 Mapped payload:", mapped);
 
+            return res.status(200).send({ message: 'Success' })
+        } else {
+            // Could not decrypt the submission
+            return res.status(400).send({ message: 'Bad Request' })
+        }
+
+         
+    }
+)
+
   // 3) Send to ServiceNow
 
-module.exports = async function sendToServiceNow(data) {
+async function sendToServiceNow(data) {
   const url = `${process.env.SERVICENOW_INSTANCE}/api/now/table/${process.env.SERVICENOW_TABLE}`;
 
   const auth = Buffer.from(
@@ -148,8 +148,7 @@ module.exports = async function sendToServiceNow(data) {
 
   const payload = {
     u_full_name: data.name1,
-    u_inmate_no: data.unique_number,
-    u_short_description: data.description
+    u_inmate_no: data.inmate_no
   };
 
   const response = await axios.post(url, payload, {
@@ -170,17 +169,5 @@ module.exports = async function sendToServiceNow(data) {
     console.error("❌ Failed to send to ServiceNow:", err);
     res.status(500).json({ error: "ServiceNow error" });
   }
-
-        /////////////
-            /////////////////////////////maping logic end///////////////
-            return res.status(200).send({ message: 'Success' })
-        } else {
-            // Could not decrypt the submission
-            return res.status(400).send({ message: 'Bad Request' })
-        }
-
-         
-    }
-)
 
 app.listen(8080, () => console.log('Running on port 8080'))
