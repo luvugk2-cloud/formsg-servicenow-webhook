@@ -17,11 +17,11 @@ const formSecretKey = process.env.FORM_SECRET_KEY
 // Set to true if you need to download and decrypt attachments from submissions
 const HAS_ATTACHMENTS = false
 
-app.get('/perm-test-dev/container/jia-jun-poc-upuu9-fe-suffix/', (req, res) => {
+app.get('/', (req, res) => {
     res.status(200).send('Hello, this is the FormSG webhook receiver!')
 });
 
-app.post('/perm-test-dev/container/jia-jun-poc-upuu9-fe-suffix/submissions',
+app.post('/formsg/webhook',
     // Endpoint authentication by verifying signatures
     function (req, res, next) {
         try {
