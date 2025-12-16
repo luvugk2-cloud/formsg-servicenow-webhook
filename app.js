@@ -53,61 +53,86 @@ app.post('/formsg/webhook',
   //const body = req.body;
   //const responses = body?.data?.responses || [];
 
-  function findField(name) {
-    const f = submission.response.answer.find((r) =>
-    typeof r?.question === 'string' &&
-      r.question.toLowerCase().includes(name.toLowerCase())
-    );
-    return f?.answer || null;
+  //function findField(name) {
+   // const f = submission.response.answer.find((r) =>
+    //typeof r?.question === 'string' &&
+     // r.question.toLowerCase().includes(name.toLowerCase())
+    //);
+    //return f?.answer || null;
+  //}
+
+function findField(submission, keyword) {
+  const answers = submission?.response?.answers;
+
+  if (!Array.isArray(answers)) return null;
+
+  const item = answers.find(a =>
+    typeof a?.question === 'string' &&
+    a.question.toLowerCase().includes(keyword.toLowerCase())
+  );
+
+  if (!item) return null;
+
+  // Handle based on field type
+  if (item.answer !== undefined) {
+    return item.answer; // text, email, number, etc.
   }
 
+  if (Array.isArray(item.answerArray)) {
+    return item.answerArray.join(', '); // checkbox, multi-select
+  }
+
+  return null;
+}
+
+
   const mapped = {
-    name: findField("Demo"),
-    description: findField("Type of Application"),
-    unique_number: findField("Type of Employment Assistance required"),
-    name: findField("Programme Details"),
-    description: findField("Programme Status"),
-    unique_number: findField("Inmate No."),
-    name: findField("Date of Release (EDR)"),
-    description: findField("Programme Emplacement Date"),
-    unique_number: findField("Have you attended any Job Preparation (JP) session by YRSG for your current incarceration?"),
-    name: findField("Where did you attend the Job Preparation (JP) session?"),
-    description: findField("Are you being assisted by any staff from Yellow Ribbon Singapore (YRSG) or Selarang Halfway House?"),
-    unique_number: findField("Name and Contact Number of Yellow Ribbon Singapore (YRSG) or Selarang Halfway House staff who is assisting you"),
-    name: findField("Current or Last Offence"),
-    description: findField("Reintegration Officer (RO)'s Name and Contact Number"),
-    unique_number: findField("Personal Information"),
-    name1: findField("Name"),
-    unique_number: findField("NRIC"),
-    description: findField("Nationality"),
-    unique_number: findField("Sex"),
-    description: findField("Race"),
-    unique_number: findField("Date of Birth"),
-    unique_number: findField("Marital Status"),
-    description: findField("National Service"),
-    unique_number: findField("Contact Number"),
-    unique_number: findField("Email"),
-    description: findField("Next-of-Kin's Name"),
-    unique_number: findField("Next-of-Kin's Contact Number"),
-    unique_number: findField("Local address"),
-    description: findField("Do you have any visible tattoo?"),
-    unique_number: findField("Tattoo Details"),
-    unique_number: findField("Education / Language Proficiency / Skills"),
-    description: findField("Highest Educational Level"),
-    unique_number: findField("Specialisation/Field of Highest Education"),
-    unique_number: findField("Spoken (Language)"),
-    description: findField("Written (Language)"),
-    unique_number: findField("Driving/Vocational Licence/Certification"),
-    description: findField("Employment History"),
-    unique_number: findField("ob History (Company Name, Job Position, Period of Employment MM/YY to MM/YY (e.g. 10/20 to 08/22), Salary)"),
-    description: findField("Job Choice 1: Position Requested"),
-    unique_number: findField("Job Choice 1: Expected Salary"),
-    description: findField("Job Choice 1: Requested Work Region"),
-    unique_number: findField("Job Choice 2: Position Requested"),
-    description: findField("Job Choice 2: Expected Salary"),
-    unique_number: findField("Job Choice 2: Requested Work Region"),
-    description: findField("Work hours preference"),
-    unique_number: findField("For Clients with Religious Preferences: F&B/Grocery/Food Delivery Jobs"),
+    name: findField(submission,"Demo"),
+    description: findField(submission,"Type of Application"),
+    unique_number: findField(submission,"Type of Employment Assistance required"),
+    name: findField(submission,"Programme Details"),
+    description: findField(submission,"Programme Status"),
+    unique_number: findField(submission,"Inmate No."),
+    name: findField(submission,"Date of Release (EDR)"),
+    description: findField(submission,"Programme Emplacement Date"),
+    unique_number: findField(submission,"Have you attended any Job Preparation (JP) session by YRSG for your current incarceration?"),
+    name: findField(submission,"Where did you attend the Job Preparation (JP) session?"),
+    description: findField(submission,"Are you being assisted by any staff from Yellow Ribbon Singapore (YRSG) or Selarang Halfway House?"),
+    unique_number: findField(submission,"Name and Contact Number of Yellow Ribbon Singapore (YRSG) or Selarang Halfway House staff who is assisting you"),
+    name: findField(submission,"Current or Last Offence"),
+    description: findField(submission,"Reintegration Officer (RO)'s Name and Contact Number"),
+    unique_number: findField(submission,"Personal Information"),
+    name1: findField(submission,"Name"),
+    unique_number: findField(submission,"NRIC"),
+    description: findField(submission,"Nationality"),
+    unique_number: findField(submission,"Sex"),
+    description: findField(submission,"Race"),
+    unique_number: findField(submission,"Date of Birth"),
+    unique_number: findField(submission,"Marital Status"),
+    description: findField(submission,"National Service"),
+    unique_number: findField(submission,"Contact Number"),
+    unique_number: findField(submission,"Email"),
+    description: findField(submission,"Next-of-Kin's Name"),
+    unique_number: findField(submission,"Next-of-Kin's Contact Number"),
+    unique_number: findField(submission,"Local address"),
+    description: findField(submission,"Do you have any visible tattoo?"),
+    unique_number: findField(submission,"Tattoo Details"),
+    unique_number: findField(submission,"Education / Language Proficiency / Skills"),
+    description: findField(submission,"Highest Educational Level"),
+    unique_number: findField(submission,"Specialisation/Field of Highest Education"),
+    unique_number: findField(submission,"Spoken (Language)"),
+    description: findField(submission,"Written (Language)"),
+    unique_number: findField(submission,"Driving/Vocational Licence/Certification"),
+    description: findField(submission,"Employment History"),
+    unique_number: findField(submission,"Job History (Company Name, Job Position, Period of Employment MM/YY to MM/YY (e.g. 10/20 to 08/22), Salary)"),
+    description: findField(submission,"Job Choice 1: Position Requested"),
+    unique_number: findField(submission,"Job Choice 1: Expected Salary"),
+    description: findField(submission,"Job Choice 1: Requested Work Region"),
+    unique_number: findField(submission,"Job Choice 2: Position Requested"),
+    description: findField(submission,"Job Choice 2: Expected Salary"),
+    unique_number: findField(submission,"Job Choice 2: Requested Work Region"),
+    description: findField(submission,"Work hours preference"),
+    unique_number: findField(submission,"For Clients with Religious Preferences: F&B/Grocery/Food Delivery Jobs"),
   };
 
   console.log("📦 Mapped payload:", mapped);
