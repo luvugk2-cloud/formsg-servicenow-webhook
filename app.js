@@ -81,7 +81,7 @@ app.post('/formsg/webhook',
     name: findField("Current or Last Offence"),
     description: findField("Reintegration Officer (RO)'s Name and Contact Number"),
     unique_number: findField("Personal Information"),
-    description: findField("Name"),
+    name1: findField("Name"),
     unique_number: findField("NRIC"),
     description: findField("Nationality"),
     unique_number: findField("Sex"),
@@ -126,7 +126,7 @@ module.exports = async function sendToServiceNow(data) {
   ).toString('base64');
 
   const payload = {
-    u_full_name: data.name,
+    u_full_name: data.name1,
     u_inmate_no: data.unique_number,
     u_short_description: data.description
   };
