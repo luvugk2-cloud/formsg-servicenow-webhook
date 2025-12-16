@@ -19,6 +19,56 @@ const formSecretKey = process.env.FORM_SECRET_KEY
 // Set to true if you need to download and decrypt attachments from submissions
 const HAS_ATTACHMENTS = false
 
+function findField(submission, keyword) {
+  const answers = submission?.response?.answers;
+
+  if (!Array.isArray(answers)) return null;
+
+  const item = answers.find(a =>
+    typeof a?.question === 'string' &&
+    a.question.toLowerCase().includes(keyword.toLowerCase())
+  );
+
+  if (!item) return null;
+
+  // Handle based on field type
+  if (item.answer !== undefined) {
+    return item.answer; // text, email, number, etc.
+  }
+
+  if (Array.isArray(item.answerArray)) {
+    return item.answerArray.join(', '); // checkbox, multi-select
+  }
+
+  return null;
+}
+
+/////
+
+// 3) Send to ServiceNow
+
+async function sendToServiceNow(data) {
+  const url = `${process.env.SERVICENOW_INSTANCE}/api/now/table/${process.env.SERVICENOW_TABLE}`;
+
+  const auth = Buffer.from(
+    `${process.env.SERVICENOW_USERNAME}:${process.env.SERVICENOW_PASSWORD}`
+  ).toString('base64');
+
+  const payload = {
+    u_full_name: data.name1,
+    u_inmate_no: data.inmate_no
+  };
+
+  const response = await axios.post(url, payload, {
+    headers: {
+      "Authorization": `Basic ${auth}`,
+      "Content-Type": "application/json"
+    }
+  });
+
+  return response.data;
+};
+
 app.get('/', (req, res) => {
     res.status(200).send('Hello, this is the FormSG webhook receiver!')
 });
@@ -48,34 +98,6 @@ app.post('/formsg/webhook',
         if (submission) {
             // Continue processing the submission
             console.log(submission);
-////////////////mapping logic///////////////////
-    
-
-function findField(submission, keyword) {
-  const answers = submission?.response?.answers;
-
-  if (!Array.isArray(answers)) return null;
-
-  const item = answers.find(a =>
-    typeof a?.question === 'string' &&
-    a.question.toLowerCase().includes(keyword.toLowerCase())
-  );
-
-  if (!item) return null;
-
-  // Handle based on field type
-  if (item.answer !== undefined) {
-    return item.answer; // text, email, number, etc.
-  }
-
-  if (Array.isArray(item.answerArray)) {
-    return item.answerArray.join(', '); // checkbox, multi-select
-  }
-
-  return null;
-}
-
-
   const mapped = {
     demo: findField(submission,"Demo"),
     type_of_application: findField(submission,"Type of Application"),
@@ -125,43 +147,8 @@ function findField(submission, keyword) {
     religious_preference: findField(submission,"For Clients with Religious Preferences: F&B/Grocery/Food Delivery Jobs"),
   };
 
-  console.log("📦 Mapped payload:", mapped);
-
-            return res.status(200).send({ message: 'Success' })
-        } else {
-            // Could not decrypt the submission
-            return res.status(400).send({ message: 'Bad Request' })
-        }
-
-         
-    }
-)
-
-  // 3) Send to ServiceNow
-
-async function sendToServiceNow(data) {
-  const url = `${process.env.SERVICENOW_INSTANCE}/api/now/table/${process.env.SERVICENOW_TABLE}`;
-
-  const auth = Buffer.from(
-    `${process.env.SERVICENOW_USERNAME}:${process.env.SERVICENOW_PASSWORD}`
-  ).toString('base64');
-
-  const payload = {
-    u_full_name: data.name1,
-    u_inmate_no: data.inmate_no
-  };
-
-  const response = await axios.post(url, payload, {
-    headers: {
-      "Authorization": `Basic ${auth}`,
-      "Content-Type": "application/json"
-    }
-  });
-
-  return response.data;
-};
-    //
-  try {
+        console.log("📦 Mapped payload:", mapped);
+    try {
     const result = await sendToServiceNow(mapped);
     console.log("✔ Created record in ServiceNow:", result);
     res.json({ status: "success" });
@@ -169,5 +156,14 @@ async function sendToServiceNow(data) {
     console.error("❌ Failed to send to ServiceNow:", err);
     res.status(500).json({ error: "ServiceNow error" });
   }
+    
+        return res.status(200).send({ message: 'Success' })
+        } else {
+            // Could not decrypt the submission
+            return res.status(400).send({ message: 'Bad Request' })
+        }
+         
+    }
+)
 
 app.listen(8080, () => console.log('Running on port 8080'))
