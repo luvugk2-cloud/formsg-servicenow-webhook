@@ -51,6 +51,37 @@ app.post('/formsg/webhook',
             // Could not decrypt the submission
             return res.status(400).send({ message: 'Bad Request' })
         }
+
+         // 2) Extract FormSG responses
+  //const body = req.body;
+  //const responses = body?.data?.responses || [];
+
+  function findField(name) {
+    const f = submission.find((r) =>
+      r.question.toLowerCase().includes(name.toLowerCase())
+    );
+    return f?.answer || null;
+  }
+
+  const mapped = {
+    name: findField("name"),
+    description: findField("description"),
+    unique_number: findField("unique number"),
+  };
+
+  console.log("📦 Mapped payload:", mapped);
+
+  // 3) Send to ServiceNow
+  try {
+    const result = await sendToServiceNow(mapped);
+    console.log("✔ Created record in ServiceNow:", result);
+    res.json({ status: "success" });
+  } catch (err) {
+    console.error("❌ Failed to send to ServiceNow:", err);
+    res.status(500).json({ error: "ServiceNow error" });
+  }
+
+        /////////////
     }
 )
 
