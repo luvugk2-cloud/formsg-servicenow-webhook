@@ -51,7 +51,7 @@ app.post('/formsg/webhook',
             ////////////////mapping logic///////////////////
             // 2) Extract FormSG responses
   const body = req.body;
-  const responses = body?.data?.responses || [];
+  const responses = body?.data?.submission || [];
 
   function findField(name) {
     const f = responses.find((r) =>
