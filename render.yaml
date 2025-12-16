@@ -28,4 +28,4 @@ services:
         value: u_yrsg_case_creation
 
       - key: PORT
-        value: 3000
+        value: 8080
