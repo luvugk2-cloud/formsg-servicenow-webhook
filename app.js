@@ -54,7 +54,7 @@ app.post('/formsg/webhook',
   //const responses = body?.data?.responses || [];
 
   function findField(name) {
-    const f = submission.response.answers.find((r) =>
+    const f = submission.response.answer.find((r) =>
       r.question.toLowerCase().includes(name.toLowerCase())
     );
     return f?.answer || null;
