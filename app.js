@@ -55,7 +55,7 @@ async function sendToServiceNow(data) {
   ).toString('base64');
 
   const payload = {
-    u_full_name: data.name1,
+    u_full_name: data.full_name,
     u_inmate_no: data.inmate_no
   };
 
@@ -114,7 +114,7 @@ app.post('/formsg/webhook',
     current_last_offence: findField(submission,"Current or Last Offence"),
     ro_name: findField(submission,"Reintegration Officer (RO)'s Name and Contact Number"),
     personal_information: findField(submission,"Personal Information"),
-    name1: findField(submission,"Name"),
+    full_name: findField(submission,"Name"),
     nric: findField(submission,"NRIC"),
     nationality: findField(submission,"Nationality"),
     sex: findField(submission,"Sex"),
