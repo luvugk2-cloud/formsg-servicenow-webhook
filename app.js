@@ -70,6 +70,29 @@ function findAddress(submission, exactQuestion) {
   };
 }
 
+function findEmploymentHistory(submission, exactQuestion) {
+  const answers = submission?.responses;
+  if (!Array.isArray(answers)) return null;
+
+  const item = answers.find(a => a.question === exactQuestion);
+  if (!item || !Array.isArray(item.answerArray)) return null;
+
+  const [
+    companyName,
+    jobPosition,
+    employmentPeriod,
+    salary
+  ] = item.answerArray;
+
+  return {
+    companyName: companyName || null,
+    jobPosition: jobPosition || null,
+    employmentPeriod: employmentPeriod || null,
+    salary: salary || null
+  };
+}
+
+
 
 /////
 
@@ -179,6 +202,7 @@ app.post('/formsg/webhook',
             // Continue processing the submission
             console.log(submission);
           const address = findAddress(submission, "Local address");
+          const employment = findEmploymentHistory(submission,"Job History (Company Name, Job Position, Period of Employment MM/YY to MM/YY (e.g. 10/20 to 08/22), Salary)");
   const mapped = {
     demo: findField(submission,"Demo"),
     type_of_application: findField(submission,"Type of Application"),
@@ -223,7 +247,11 @@ app.post('/formsg/webhook',
     written: findField(submission,"Written (Language)"),
     dlc: findField(submission,"Driving/Vocational Licence/Certification"),
     employment_history: findField(submission,"Employment History"),
-    cjp: findField(submission,"Job History (Company Name, Job Position, Period of Employment MM/YY to MM/YY (e.g. 10/20 to 08/22), Salary)"),
+    //cjp: findField(submission,"Job History (Company Name, Job Position, Period of Employment MM/YY to MM/YY (e.g. 10/20 to 08/22), Salary)"),
+  company_name: employment?.companyName,
+  job_position: employment?.jobPosition,
+  employment_period: employment?.employmentPeriod,
+  last_drawn_salary: employment?.salary,
     jps1: findField(submission,"Job Choice 1: Position Requested"),
     jes1: findField(submission,"Job Choice 1: Expected Salary"),
     jrwr1: findField(submission,"Job Choice 1: Requested Work Region"),
