@@ -288,7 +288,7 @@ async function jobsendToServiceNow(data) {
 ////////////
 
 async function sendJobChoicesToServiceNow(jobChoices, parentSysId) {
-  const url = `${process.env.SERVICENOW_INSTANCE}/api/now/table/u_job_choice`;
+  const url = `${process.env.SERVICENOW_INSTANCE}/api/now/table/u_cms_job_preference`;
 
   const auth = Buffer.from(
     `${process.env.SERVICENOW_USERNAME}:${process.env.SERVICENOW_PASSWORD}`
@@ -298,8 +298,8 @@ async function sendJobChoicesToServiceNow(jobChoices, parentSysId) {
     await axios.post(
       url,
       {
-        u_parent_case: parentSysId,   // reference field
-        u_choice_no: job.choice,
+        u_inmate_no: parentSysId,   // reference field
+        u_job_prefernce_id: job.choice,
         u_position_requested: job.position,
         u_expected_salary: job.expectedSalary,
         u_requested_work_region: job.workRegion
