@@ -172,6 +172,31 @@ async function sendToServiceNow(data) {
   return response.data;
 };
 
+async function jobsendToServiceNow(data) {
+  const url = `${process.env.SERVICENOW_INSTANCE}/api/now/table/u_cms_job_exp`;
+
+  const auth = Buffer.from(
+    `${process.env.SERVICENOW_USERNAME}:${process.env.SERVICENOW_PASSWORD}`
+  ).toString('base64');
+
+  const jobpayload = {
+    u_company_name: data.company_name,
+    u_occupation: data.job_position,
+    u_period: data.employment_period,
+    u_past_salary_earned: data.last_drawn_salary
+  };
+
+  const jobresponse = await axios.post(url, jobpayload, {
+    headers: {
+      "Authorization": `Basic ${auth}`,
+      "Content-Type": "application/json"
+    }
+  });
+
+  return jobresponse.data;
+};
+
+
 app.get('/', (req, res) => {
     res.status(200).send('Hello, this is the FormSG webhook receiver!')
 });
@@ -203,7 +228,14 @@ app.post('/formsg/webhook',
             console.log(submission);
           const address = findAddress(submission, "Local address");
           const employment = findEmploymentHistory(submission,"Job History (Company Name, Job Position, Period of Employment MM/YY to MM/YY (e.g. 10/20 to 08/22), Salary)");
-  const mapped = {
+          const jobmapped = {
+            company_name: employment?.companyName,
+            job_position: employment?.jobPosition,
+            employment_period: employment?.employmentPeriod,
+            last_drawn_salary: employment?.salary,
+          };
+          
+    const mapped = {
     demo: findField(submission,"Demo"),
     type_of_application: findField(submission,"Type of Application"),
     employment_assistance: findField(submission,"Type of Employment Assistance required"),
@@ -248,10 +280,6 @@ app.post('/formsg/webhook',
     dlc: findField(submission,"Driving/Vocational Licence/Certification"),
     employment_history: findField(submission,"Employment History"),
     //cjp: findField(submission,"Job History (Company Name, Job Position, Period of Employment MM/YY to MM/YY (e.g. 10/20 to 08/22), Salary)"),
-  company_name: employment?.companyName,
-  job_position: employment?.jobPosition,
-  employment_period: employment?.employmentPeriod,
-  last_drawn_salary: employment?.salary,
     jps1: findField(submission,"Job Choice 1: Position Requested"),
     jes1: findField(submission,"Job Choice 1: Expected Salary"),
     jrwr1: findField(submission,"Job Choice 1: Requested Work Region"),
@@ -263,9 +291,12 @@ app.post('/formsg/webhook',
   };
 
         console.log("📦 Mapped payload:", mapped);
+        console.log("📦 Mapped payload:", jobmapped);
     try {
     const result = await sendToServiceNow(mapped);
+      const jobresult = await sendToServiceNow(jobmapped);
     console.log("✔ Created record in ServiceNow:", result);
+      console.log("✔ Created record in ServiceNow:", jobresult);
     res.json({ status: "success" });
   } catch (err) {
     console.error("❌ Failed to send to ServiceNow:", err);
