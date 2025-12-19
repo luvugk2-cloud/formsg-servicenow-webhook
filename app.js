@@ -183,25 +183,39 @@ function extractJobChoices(submission) {
 
 /////
 
-// 3) Send to ServiceNow
-
-async function sendToServiceNow(data) {
-  const url = `${process.env.SERVICENOW_INSTANCE}/api/now/table/${process.env.SERVICENOW_TABLE}`;
+async function getCaseByInmateNo(inmateNo) {
+  const url =
+    `${process.env.SERVICENOW_INSTANCE}` +
+    `/api/now/table/${process.env.SERVICENOW_TABLE}` +
+    `?sysparm_query=u_inmate_no=${encodeURIComponent(inmateNo)}` +
+    `&sysparm_limit=1`;
 
   const auth = Buffer.from(
     `${process.env.SERVICENOW_USERNAME}:${process.env.SERVICENOW_PASSWORD}`
-  ).toString('base64');
+  ).toString("base64");
+
+  const res = await axios.get(url, {
+    headers: {
+      Authorization: `Basic ${auth}`
+    }
+  });
+
+  return res.data.result?.[0] || null;
+}
+
+
+// 3) Send to ServiceNow
+
+async function upsertParentCase(data) {
+  const auth = Buffer.from(
+    `${process.env.SERVICENOW_USERNAME}:${process.env.SERVICENOW_PASSWORD}`
+  ).toString("base64");
 
   const payload = {
-    //u_full_name: data.full_name,
-    //u_inmate_no: data.inmate_no
-    //u_full_name: data.demo
+    u_inmate_no: data.inmate_no,
     u_application_type: data.type_of_application,
     u_employment_assistance_type: data.employment_assistance,
-    //u_full_name: data.programme_details,
-    //u_programme_status: data.programme_status,
     u_cbp_schemes_emplace: data.programme_status,
-    u_inmate_no: data.inmate_no,
     u_ed0: data.dor,
     u_cbp_emplacement_date: data.programme_emplacement_date,
     u_attended_jp_session: data.jp_attend,
@@ -210,7 +224,6 @@ async function sendToServiceNow(data) {
     u_staff_name_contact_number: data.name_yrsg,
     u_offence_desc: data.current_last_offence,
     u_ro_name_contact_number: data.ro_name,
-    //u_full_name: data.personal_information,
     u_full_name: data.full_name,
     u_nric_fin: data.nric,
     u_citizenship: data.nationality,
@@ -223,7 +236,6 @@ async function sendToServiceNow(data) {
     u_email: data.email,
     u_nok_name: data.NOK_name,
     u_next_of_kin_name_contact_no: data.NOK_contact_number,
-    //u_full_name: data.local_address,
     u_blk_hse_no: data.address_block,
     u_street_name: data.address_street,
     u_unit_no: formatUnit(data.address_level, data.address_unit),
@@ -231,34 +243,62 @@ async function sendToServiceNow(data) {
     u_building_name: data.address_building,
     u_visible_tattoo: data.visible_tattoo,
     u_tattoo_details: data.tatto_details,
-    //u_full_name: data.els,
     u_highest_edu_qualification: data.hel,
     u_highest_edu_qualification_specialisation: data.she,
     u_spoken_language: data.spoken,
     u_written_language: data.written,
     u_driving_vocational_license_certification: data.dlc,
-    //u_full_name: data.employment_history,
-    //u_full_name: data.cjp,
-    //u_full_name: data.jps1,
-    //u_full_name: data.jes1,
-    //u_full_name: data.jrwr1,
-    //u_full_name: data.jps2,
-    //u_full_name: data.jes2,
-    //u_full_name: data.jrwr2,
     u_work_hours_preference: data.whp,
     u_religious_preference: data.religious_preference
-
   };
 
-  const response = await axios.post(url, payload, {
+  const existing = await getCaseByInmateNo(data.inmate_no);
+
+  if (existing) {
+    // 🔄 UPDATE
+    const updateUrl =
+      `${process.env.SERVICENOW_INSTANCE}` +
+      `/api/now/table/${process.env.SERVICENOW_TABLE}/${existing.sys_id}`;
+
+    const res = await axios.patch(updateUrl, payload, {
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    return { sys_id: existing.sys_id, action: "updated", result: res.data };
+  }
+
+  // 🆕 CREATE
+  const createUrl =
+    `${process.env.SERVICENOW_INSTANCE}` +
+    `/api/now/table/${process.env.SERVICENOW_TABLE}`;
+
+  const res = await axios.post(createUrl, payload, {
     headers: {
-      "Authorization": `Basic ${auth}`,
+      Authorization: `Basic ${auth}`,
       "Content-Type": "application/json"
     }
   });
 
-  return response.data;
-};
+  return { sys_id: res.data.result.sys_id, action: "created", result: res.data };
+}
+//////////////////////////
+async function deleteChildRecords(table, parentSysId) {
+  const url =
+    `${process.env.SERVICENOW_INSTANCE}` +
+    `/api/now/table/${table}?sysparm_query=u_inmate_no=${parentSysId}`;
+
+  const auth = Buffer.from(
+    `${process.env.SERVICENOW_USERNAME}:${process.env.SERVICENOW_PASSWORD}`
+  ).toString("base64");
+
+  await axios.delete(url, {
+    headers: { Authorization: `Basic ${auth}` }
+  });
+}
+//////////////////////////////
 
 async function jobsendToServiceNow(data) {
   const url = `${process.env.SERVICENOW_INSTANCE}/api/now/table/u_cms_job_exp`;
@@ -418,13 +458,21 @@ app.post('/formsg/webhook',
         console.log("📦 Mapped payload:", mapped);
         //console.log("📦 Mapped payload:", jobmapped);
     try {
-    const result = await sendToServiceNow(mapped);
-      const parentSysId = result.result.sys_id;
+      const parent = await upsertParentCase(mapped);
+      const parentSysId = parent.sys_id;
+
+      console.log(`✔ Parent record ${parent.action}:`, parentSysId);
+
+    //const result = await sendToServiceNow(mapped);
+      //const parentSysId = result.result.sys_id;
       //const jobresult = await jobsendToServiceNow({
   //...jobmapped,
  // parent_sys_id: parentSysId
 //});
-  for (const job of employmentList) {
+await deleteChildRecords("u_cms_job_exp", parentSysId);
+await deleteChildRecords("u_cms_job_preference", parentSysId);
+
+for (const job of employmentList) {                  // job history
   await jobsendToServiceNow({
     parent_sys_id: parentSysId,
     company_name: job.companyName,
@@ -433,9 +481,11 @@ app.post('/formsg/webhook',
     last_drawn_salary: job.salary
   });
 }
-      await sendJobChoicesToServiceNow(jobChoices, parentSysId);    //job preference call to snow
 
-    console.log("✔ Created record in ServiceNow:", result);
+await sendJobChoicesToServiceNow(jobChoices, parentSysId);  ////job preference
+
+
+    console.log("✔ Created record in ServiceNow:", ${parent.result});
       //console.log("✔ Created record in ServiceNow:", jobresult);
     res.json({ status: "success" });
   } catch (err) {
