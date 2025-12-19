@@ -294,7 +294,9 @@ async function deleteChildRecords(table, parentSysId) {
 
   // 1️⃣ Fetch child records
   const getRes = await axios.get(
-    `${baseUrl}?sysparm_query=u_inmate_no=${parentSysId}`,
+   // `${baseUrl}?sysparm_query=u_inmate_no=${parentSysId}`,
+    `${baseUrl}?sysparm_query=u_inmate_no.sys_id=${parentSysId}`,
+
     {
       headers: { Authorization: `Basic ${auth}` }
     }
