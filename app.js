@@ -485,7 +485,7 @@ for (const job of employmentList) {                  // job history
 await sendJobChoicesToServiceNow(jobChoices, parentSysId);  ////job preference
 
 
-    console.log("✔ Created record in ServiceNow:", ${parent.result});
+    console.log("✔ Created record in ServiceNow:");
       //console.log("✔ Created record in ServiceNow:", jobresult);
     res.json({ status: "success" });
   } catch (err) {
