@@ -199,7 +199,7 @@ async function sendToServiceNow(data) {
     u_application_type: data.type_of_application,
     u_employment_assistance_type: data.employment_assistance,
     //u_full_name: data.programme_details,
-    u_programme_status: data.programme_status,
+    //u_programme_status: data.programme_status,
     u_cbp_schemes_emplace: data.programme_status,
     u_inmate_no: data.inmate_no,
     u_ed0: data.dor,
