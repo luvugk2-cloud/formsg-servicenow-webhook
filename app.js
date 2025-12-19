@@ -260,7 +260,7 @@ async function upsertParentCase(data) {
       `${process.env.SERVICENOW_INSTANCE}` +
       `/api/now/table/${process.env.SERVICENOW_TABLE}/${existing.sys_id}`;
 
-    const res = await axios.patch(updateUrl, payload, {
+    const res = await axios.put(updateUrl, payload, {
       headers: {
         Authorization: `Basic ${auth}`,
         "Content-Type": "application/json"
@@ -286,18 +286,30 @@ async function upsertParentCase(data) {
 }
 //////////////////////////
 async function deleteChildRecords(table, parentSysId) {
-  const url =
-    `${process.env.SERVICENOW_INSTANCE}` +
-    `/api/now/table/${table}?sysparm_query=u_inmate_no=${parentSysId}`;
+  const baseUrl = `${process.env.SERVICENOW_INSTANCE}/api/now/table/${table}`;
 
   const auth = Buffer.from(
     `${process.env.SERVICENOW_USERNAME}:${process.env.SERVICENOW_PASSWORD}`
   ).toString("base64");
 
-  await axios.delete(url, {
-    headers: { Authorization: `Basic ${auth}` }
-  });
+  // 1️⃣ Fetch child records
+  const getRes = await axios.get(
+    `${baseUrl}?sysparm_query=u_inmate_no=${parentSysId}`,
+    {
+      headers: { Authorization: `Basic ${auth}` }
+    }
+  );
+
+  const records = getRes.data.result || [];
+
+  // 2️⃣ Delete each record by sys_id
+  for (const rec of records) {
+    await axios.delete(`${baseUrl}/${rec.sys_id}`, {
+      headers: { Authorization: `Basic ${auth}` }
+    });
+  }
 }
+
 //////////////////////////////
 
 async function jobsendToServiceNow(data) {
