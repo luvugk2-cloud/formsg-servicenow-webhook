@@ -292,7 +292,7 @@ async function upsertParentCase(data) {
       "I am willing to work in a non-Halal establishment"
     ),
   
-    u_halal_estblmntto: hasOption(
+    u_halal_estblmnt: hasOption(
       data.religious_preference,
       "I am willing to work only in a Halal establishment"
     )
